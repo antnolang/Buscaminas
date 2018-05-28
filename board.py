@@ -1,3 +1,6 @@
+# %load board.py
+
+# %load board.py
 import random
 import math
 
@@ -107,3 +110,4 @@ class Board():
             res += '\n'
         
         return res
+    
