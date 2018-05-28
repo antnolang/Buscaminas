@@ -1,8 +1,3 @@
-# NOTE : First commit your current changes, or you will lose them. 
-# git rm -r --cached .
-# git add .
-# git commit -m "Limpieza de Cache"  
-
 .ipynb_checkpoints/
 .ipynb_checkpoints/*
 Buscaminas.ipynb
