@@ -1,6 +1,3 @@
-# %load board.py
-
-# %load board.py
 import random
 import math
 
