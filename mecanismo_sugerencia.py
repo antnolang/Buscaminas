@@ -1,4 +1,5 @@
 
+import matplotlib.pyplot as plt
 import networkx as nx  # Permite trabajar con grafos
 import pgmpy.models as pgmm  # Modelos gráficos de probabilidad
 import pgmpy.factors.discrete as pgmf  # Tablas de probabilidades condicionales y
@@ -14,7 +15,7 @@ def generateDAG(n, m):
     # Por tanto, vamos a ir recorriendo cada una de las casillas del tablero y creando aristas que una
     # el vértice Y de esa casilla con los vértices X de las casillas colindantes.
     # Los vértices se crean automáticamente.
-    DAG = nx.Graph()
+    
     Modelo_Buscaminas = pgmm.BayesianModel()
     for i in range(1,n+1):
         for j in range(1,m+1):
@@ -81,28 +82,36 @@ def generateDAG(n, m):
                                           ('X'+str(i-1)+str(j-1),'Y'+str(i)+str(j)),
                                           ('X'+str(i-1)+str(j),'Y'+str(i)+str(j)),
                                           ('X'+str(i-1)+str(j+1),'Y'+str(i)+str(j))])
-                    
-            DAG.add_nodes_from(Modelo_Buscaminas.nodes())
-            DAG.add_edges_from(Modelo_Buscaminas.edges())
             
-    return DAG
+    return Modelo_Buscaminas
 
+# TODO: Esta funcion, networkx y matplot no-se-que están momentaneamente.
 def drawDAG(DAG):
-    nx.draw(DAG, with_labels=True, font_weight='bold')
-    return True
+    nxg = nx.Graph()
+    nxg.add_nodes_from(DAG.nodes())
+    nxg.add_edges_from(DAG.edges())
+    nx.draw(nxg, with_labels=True, font_weight='bold')
 
-# Vecinos de la variable Yi,j en el grafo
-def neighborsOf(DAG,y):
-    neighbors = []
-    for node in DAG[y]:
-        neighbors.append(node)
-    return neighbors
+    #drawDAG(bn)
+    #plt.show(bn)
+    
+def mines_count(j):
+    number = format(j, 'b')
+    return number.count('1')
 
-# CPT (Conditional Probability Tables) asociada a las variables de Y
-def createCPT(DAG):
-    variablesY = []
-    CPTs = {}
+# CPD (Conditional Probability Distribution) asociada a las variables de Y
+def createCPT(DAG, m, n, num_of_mines):
     for node in DAG.nodes():
+        # Cuando hagamos el for también para X, este if sobra.
         if node[0] == 'Y':
-            neighbors = neighborsOf(DAG,node)
-            y_CPT = pgmf.TabularCPD(node,len(neighbors)+1,,neighbors,[2 for i in neighbors])
+            neighbors = list(DAG.get_parents(node))
+            num_of_states = len(neighbors)+1
+            combinations = 2**len(neighbors)
+            y_CPD = pgmf.TabularCPD(node, num_of_states, [[1 if mines_count(j) == i else 0 for j in range(combinations)] for i in range(num_of_states)],neighbors,[2 for n in neighbors])
+            DAG.add_cpds(y_CPD)
+        elif node[0] == 'X':
+            size = m*n
+            mine_prob = num_of_mines/size
+            no_mine_prob = 1 - mine_prob
+            x_CPD = pgmf.TabularCPD(node, 2, [[no_mine_prob, mine_prob]])
+            DAG.add_cpds(x_CPD)

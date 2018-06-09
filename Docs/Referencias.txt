@@ -1,4 +1,4 @@
 - Biblioteca "random": https://docs.python.org/3/library/random.html
 - Biblioteca "math": https://docs.python.org/3/library/math.html
 - Biblioteca "networkx": https://networkx.github.io/documentation/stable/index.html
-- Biblioteca "pgmpy": https://github.com/pgmpy/pgmpy
+- Biblioteca "pgmpy": http://pgmpy.org/
