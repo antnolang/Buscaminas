@@ -1,5 +1,6 @@
 import random
 import math
+import operator
 
 class Square():
     
@@ -17,92 +18,129 @@ class Square():
     def inc_neighbor_mines(self):
         self.neighbor_mines += 1
 
-# TODO: Attributes and functions non-public
-# La clase *Board* genera un tablero de casillas dados los siguientes parámetros de entrada:
-#
-#    - width: Anchura del tablero (número de casillas).
-#    - height: Altura del tablero (número de casillas).
-#    - num_mines: Número de minas que contendrá el tablero.
-
+# La casilla (0,0) corresponde a la esquina superior izquierda
+# Representación de posición: (i,j) ==> i: fila, j: columna
 class Board():
     
-    NEIGHBOR_COORDS = (
-        (-1, 1), (0, 1), (1, 1),
-        (-1, 0),         (1, 0),
-        (-1,-1), (0,-1), (1,-1)
+    # Cada dupla corresponde a los valores que hay que sumar a una posición 
+    # determinada de la matriz para calcular uno de sus 8 posibles vecinos.
+    NEIGHBOR_POSITION = (
+        (-1,-1), (-1,0), (-1,1),
+        ( 0,-1),         ( 0,1),
+        ( 1,-1), ( 1,0), ( 1,1)
     )
     
-    def __init__(self, width, height, num_mines):
-        self.size_x = width
-        self.size_y = height
-        self.squares = [[Square() for y in range(self.size_y)] for x in range(self.size_x)]
+    def __init__(self, width, height, num_of_mines):
+        self.width = width
+        self.height = height
+        self.squares = [[Square() for j in range(width)] for i in range(height)]
+        self.bayesian_network = generateBN(width, height, num_of_mines)
         
-        self.place_mines(num_mines)
-    
-    def place_mines(self, num_mines):
-        mines = random.sample(range(self.size_x * self.size_y), num_mines)
-        for i in mines:
-            mine_coords = self.get_coordinates(i)
-            x = mine_coords[0]
-            y = mine_coords[1]
-            square = self.squares[x][y]
+        self.__place_mines__(num_of_mines)
+        
+    # Coloca las minas en el tablero:
+    #     1.- Se genera un número aleatorio distinto por cada mina.
+    #     2.- A cada número aleatorio se le asocia una casilla mediante 
+    #         "__get_coordinates__()".
+    #     3.- Se coloca cada mina en la posición calculada.
+    #     4.- Se actualiza "Square::neighbor_mines" de las casillas vecinas 
+    #         de cada una de las minas (llamando a "__update_neighbors__()").
+    def __place_mines__(self, num_of_mines):
+        mines = random.sample(range(self.width * self.height), num_of_mines)
+        for m in mines:
+            mine_position = self.__get_coordinates__(m)
+            i = mine_position[0]
+            j = mine_position[1]
+            square = self.squares[i][j]
             square.set_mine()
             
-            self.update_neighbors(x, y)
-            
-    # Example with 3x3 board:
-    #     - Mine 0 (mine = 0) belong to the coordinates (0,2). Top-left corner.
-    #     - Mine 8 (mine = 8) belong to the coordinates (2,0). Bottom-right corner.
-    def get_coordinates(self, mine):
-        y = math.floor(mine/self.size_x)
-        x = mine - self.size_x*y
-        return (x, y)
+            self.__update_neighbors__(i, j)
+        
+    def __get_coordinates__(self, mine):
+        i = math.floor(mine/self.width)
+        j = mine - self.width*i
+        return (i, j)
     
-    def update_neighbors(self, coord_x, coord_y):
-        for i in range(8):
-            x = coord_x + self.NEIGHBOR_COORDS[i][0]
-            y = coord_y + self.NEIGHBOR_COORDS[i][1]
-            if not (self.invalid_coords(x, y)):
-                neighbor = self.squares[x][y]
+    def __update_neighbors__(self, i, j):
+        for n in range(8):
+            ni = i + self.NEIGHBOR_POSITION[n][0]
+            nj = j + self.NEIGHBOR_POSITION[n][1]
+            if not (self.__invalid_position__(ni, nj)):
+                neighbor = self.squares[ni][nj]
                 neighbor.inc_neighbor_mines()
-                
-    def invalid_coords(self, coord_x, coord_y):
-        return (coord_x < 0 
-                or coord_x >= self.size_x 
-                or coord_y < 0 
-                or coord_y >= self.size_y
+    
+    # Tiene en cuenta los límites del tablero
+    def __invalid_position__(self, i, j):
+        return (j < 0 
+                or j >= self.width 
+                or i < 0 
+                or i >= self.height
         )
     
-    # Defined for debugging
+    # DEBUGGING
     def print_revealed(self):
         res = ''
         
-        for y in range(self.size_y):
-            for x in range(self.size_x):
-                square = self.squares[x][y]
+        for i in range(self.height):
+            for j in range(self.width):
+                square = self.squares[i][j]
                 res += '* ' if square.is_mine else '{} '.format(square.neighbor_mines)
             res += '\n'
         
         return res
 
-#    This function only reveals the selected square. Need to implement a
-#    recursive algorithm to reveal contiguous squares without mines.
-#
-#    def reveal(self, coord_x, coord_y):
-#        square = self.squares[coord_x][coord_y]
-#        if square.is_mine:
-#            print('GAME OVER\n=================')
-#            print(self.print_revealed())
-#        else:
-#            square.reveal()
-#            print(self.__str__())
+    # TODO: This function only reveals the selected square. Need to implement
+    #       a recursive algorithm to reveal contiguous squares without mines.
+    def reveal(self, i, j):
+        square = self.squares[i][j]
+        
+        if square.is_mine:
+            print('GAME OVER\n=================')
+            print(self.print_revealed())
+        else:
+            square.reveal()
+            print(self.__str__())
+            res = self.__suggest_next_square__()
+            print('Suggested next square: {}'.format(res))
+
+    def __suggest_next_square__(self):
+        prob_X = {}
+        hidden = []
+        not_hidden = []
+        for j in range(self.width):
+            for i in range(self.height):
+                square = self.squares[i][j]
+                if square.is_hidden:
+                    hidden.append((i,j))
+                else:
+                    not_hidden.append((i,j))
+         
+        evidences = self.__get_evidences__(not_hidden)
+        for sq in hidden:
+            prob_X[(sq[0],sq[1])] = calcule_prob_X(self.bayesian_network, sq[0], sq[1], evidences)
+        
+        # DEBUGGING: return prob_X
+        return max(prob_X.items(), key=operator.itemgetter(1))[0]
+    
+    def __get_evidences__(self, not_hidden):
+        evidences = {}
+        for pos in not_hidden:
+            i = pos[0]
+            j = pos[1]
+            square = self.squares[i][j]
+            X = bn_X_name(i, j)
+            Y = bn_Y_name(i, j)
+            evidences[Y] = square.neighbor_mines
+            evidences[X] = int(square.is_mine)
+        
+        # DEBUGGING: print('=============================\n{}\n============================='.format(evidences))
+        return evidences
     
     def __str__(self):
         res = ''
-        
-        for y in range(self.size_y):
-            for x in range(self.size_x):
-                square = self.squares[x][y]
+        for i in range(self.height):
+            for j in range(self.width):
+                square = self.squares[i][j]
                 res += '_ ' if square.is_hidden else '{} '.format(square.neighbor_mines)
             res += '\n'
         

@@ -9,13 +9,20 @@ import pgmpy.inference as pgmi  # Inferencia probabilística exacta
 # el DAG
 # Para ello, definimos los vértices y las aristas del grafo.
 
-def generateDAG(n, m, num_mines):            
+def generateBN(width, height, num_of_mines):
+    DAG = generateDAG(width, height)
+    createCPDs(DAG, width, height, num_of_mines)
+    return DAG
+
+def generateDAG(width, height):            
     # Añadimos las aristas a la red bayesiana
     # Un vértice del tipo Yij tendrá una arista con otro vértice de la forma Xij si son colidantes
     # Por tanto, vamos a ir recorriendo cada una de las casillas del tablero y creando aristas que una
     # el vértice Y de esa casilla con los vértices X de las casillas colindantes.
     # Los vértices se crean automáticamente.
     
+    m = width
+    n = height
     Modelo_Buscaminas = pgmm.BayesianModel()
     for i in range(1,n+1):
         for j in range(1,m+1):
@@ -81,26 +88,22 @@ def generateDAG(n, m, num_mines):
                                           ('X'+str(i+1)+str(j+1),'Y'+str(i)+str(j)),
                                           ('X'+str(i-1)+str(j-1),'Y'+str(i)+str(j)),
                                           ('X'+str(i-1)+str(j),'Y'+str(i)+str(j)),
-                                          ('X'+str(i-1)+str(j+1),'Y'+str(i)+str(j))])
-                    
-    createCPD(Modelo_Buscaminas, n, m, num_mines)            
+                                          ('X'+str(i-1)+str(j+1),'Y'+str(i)+str(j))])         
     
     return Modelo_Buscaminas
 
-# TODO: Esta funcion y los imports networkx y matplotlib.pyplot están de manera 
-#       temporal para poder imprimir el grafo. Eliminar todo esto en la versión final
+# TODO: Esta función y los imports networkx y matplotlib.pyplot están de manera 
+#       temporal para poder imprimir el grafo. Eliminar todo esto en la versión final.
 def drawDAG(DAG):
     nxg = nx.Graph()
     nxg.add_nodes_from(DAG.nodes())
     nxg.add_edges_from(DAG.edges())
     nx.draw(nxg, with_labels=True, font_weight='bold')
-
+    
     #drawDAG(bn)
     #plt.show(bn)
 
-# ===============================================================================
-#                                prob_Y(y, comb)
-# =============================================================================== 
+
 # Calcula la probabilidad de Y = y dadas las variables X vecinas como evidencia.
 #
 # + Entradas:
@@ -120,26 +123,44 @@ def drawDAG(DAG):
 # + Calcular número de variables X con valor 1: Pasamos comb a binario. Ahora 
 #   tenemos el estado de todas las variables X vecinas de Y. Contando los 1's 
 #   del número binario, obtenemos el número de variables X con valor 1.
-
 def prob_Y(y, comb):
     comb = format(comb, 'b')
     one_count = comb.count('1')
     return 1 if y == one_count else 0
 
-def createCPD(DAG, n, m, num_mines):
+def createCPDs(DAG, width, height, num_of_mines):
     for node in DAG.nodes():
         if node[0] == 'Y':
-            neighbors = list(DAG.get_parents(node))
-            num_of_states = len(neighbors)+1
-            combinations = 2**len(neighbors)
-            y_CPD = pgmf.TabularCPD(node, num_of_states, 
-                            [[prob_Y(i, comb) for comb in range(combinations)] 
-                                              for i in range(num_of_states)], 
-                            neighbors, [2 for n in neighbors])
-            DAG.add_cpds(y_CPD)
+            create_y_CPD(node, DAG)
         elif node[0] == 'X':
-            size = m*n
-            prob_X = num_mines/size
-            prob_no_X = 1 - prob_X
-            x_CPD = pgmf.TabularCPD(node, 2, [[prob_no_X, prob_X]])
-            DAG.add_cpds(x_CPD)
+            create_x_CPD(node, DAG, width, height, num_of_mines)
+
+def create_y_CPD(node, DAG):
+    neighbors = list(DAG.get_parents(node))
+    num_of_states = len(neighbors)+1
+    combinations = 2**len(neighbors)
+    y_CPD = pgmf.TabularCPD(node, num_of_states, 
+                            [[prob_Y(ns, comb) for comb in range(combinations)]
+                                               for ns in range(num_of_states)
+                            ], neighbors, [2 for n in neighbors])
+    DAG.add_cpds(y_CPD)
+    
+def create_x_CPD(node, DAG, width, height, num_of_mines):
+    size = width*height
+    prob_X = num_of_mines/size
+    prob_no_X = 1 - prob_X
+    x_CPD = pgmf.TabularCPD(node, 2, [[prob_no_X, prob_X]])
+    DAG.add_cpds(x_CPD)
+    
+def calcule_prob_X(DAG, i, j, evidences):
+    var_x = bn_X_name(i,j)
+    DAG_ev = pgmi.VariableElimination(DAG)
+    query = DAG_ev.query([var_x], evidences)
+    query_res = query[var_x]
+    return query_res.values[0]
+
+def bn_X_name(i, j):
+    return 'X' + str(i + 1) + str(j + 1)
+
+def bn_Y_name(i, j):
+    return 'Y' + str(i + 1) + str(j + 1)
