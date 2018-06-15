@@ -1,3 +1,4 @@
+
 import random
 import math
 import operator
@@ -17,6 +18,10 @@ class Square():
         
     def inc_neighbor_mines(self):
         self.neighbor_mines += 1
+    
+    # Delete later
+    def __str__(self):
+        return 'X={0}, Y={1} and hidden={2}'.format(self.is_mine, self.neighbor_mines, self.is_hidden)
 
 # La casilla (0,0) corresponde a la esquina superior izquierda
 # Representación de posición: (i,j) ==> i: fila, j: columna
@@ -85,9 +90,34 @@ class Board():
             for j in range(self.width):
                 square = self.squares[i][j]
                 res += '* ' if square.is_mine else '{} '.format(square.neighbor_mines)
-            res += '\n'
+            res += '\n '
         
         return res
+    
+    # DEBUGGING
+    def showSelectedSquare(self, i, j):
+        square = self.squares[i][j]
+        print(square)
+    
+    def getSquare(self,i,j):
+        return self.squares[i][j]
+    
+    # P=(i,j): casilla que se encuentra en las coordenadas (i,j) del tablero.
+    # Debe mostrar la información de aquellas casillas vecinas hasta que se topa con una cuya Y>=1
+    # Flood fill algorithm
+    def reveal_Information(self, i, j):
+        if not (self.__invalid_position__(i, j)):        
+            square = self.getSquare(i,j)
+            if square.is_mine==False and square.is_hidden==True:
+                if square.neighbor_mines==0:
+                    square.reveal()
+                    self.reveal_Information(i+1,j)
+                    self.reveal_Information(i-1,j)
+                    self.reveal_Information(i,j+1)
+                    self.reveal_Information(i,j-1)
+                else:
+                    square.reveal()
+            
 
     # TODO: This function only reveals the selected square. Need to implement
     #       a recursive algorithm to reveal contiguous squares without mines.
@@ -103,6 +133,7 @@ class Board():
             res = self.__suggest_next_square__()
             print('Suggested next square: {}'.format(res))
 
+            
     def __suggest_next_square__(self):
         prob_X = {}
         hidden = []
