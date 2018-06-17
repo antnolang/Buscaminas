@@ -120,6 +120,7 @@ class Board():
             if square.is_mine==False and square.is_hidden==True:
                 if square.neighbor_mines==0:
                     square.reveal()
+                    self.__add_evidence__(i, j)
                     self.reveal_Information(i+1,j)
                     self.reveal_Information(i-1,j)
                     self.reveal_Information(i,j+1)
@@ -138,7 +139,6 @@ class Board():
             self.reveal_Information(i, j)
             print(self.__str__())
             
-            self.__add_evidence__(i, j)
             suggested = self.__suggest_next_square__()
             print('Suggested next square: {}'.format(suggested))
 
@@ -150,9 +150,9 @@ class Board():
         for sq in hidden:
             prob_X[(sq[0],sq[1])] = calcule_prob_X(self.variable_elimination, sq[0], sq[1], self.evidences)
             
-        # DEBUGGING: return prob_X
+        return prob_X
         # En caso de que haya dos valores máximos, devuelve el primero que encontró
-        return max(prob_X.items(), key=operator.itemgetter(1))[0]
+        # DEBUGGING: return max(prob_X.items(), key=operator.itemgetter(1))[0]
         
     def __get_hidden_squares__(self):
         hidden = set()
