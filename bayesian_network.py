@@ -9,20 +9,20 @@ import pgmpy.inference as pgmi  # Inferencia probabilística exacta
 # el DAG
 # Para ello, definimos los vértices y las aristas del grafo.
 
-def generateBN(width, height, num_of_mines):
-    DAG = generateDAG(width, height)
-    createCPDs(DAG, width, height, num_of_mines)
+def generateBN(height, width, num_of_mines):
+    DAG = generateDAG(height, width)
+    createCPDs(DAG, height, width, num_of_mines)
     return DAG
 
-def generateDAG(width, height):            
+def generateDAG(height, width):            
     # Añadimos las aristas a la red bayesiana
     # Un vértice del tipo Yij tendrá una arista con otro vértice de la forma Xij si son colidantes
     # Por tanto, vamos a ir recorriendo cada una de las casillas del tablero y creando aristas que una
     # el vértice Y de esa casilla con los vértices X de las casillas colindantes.
     # Los vértices se crean automáticamente.
     
-    m = width
     n = height
+    m = width
     Modelo_Buscaminas = pgmm.BayesianModel()
     for i in range(1,n+1):
         for j in range(1,m+1):
@@ -126,14 +126,14 @@ def drawDAG(DAG):
 def prob_Y(y, comb):
     comb = format(comb, 'b')
     one_count = comb.count('1')
-    return 1 if y == one_count else 0
+    return float(y == one_count)
 
-def createCPDs(DAG, width, height, num_of_mines):
+def createCPDs(DAG, height, width, num_of_mines):
     for node in DAG.nodes():
         if node[0] == 'Y':
             create_y_CPD(node, DAG)
         elif node[0] == 'X':
-            create_x_CPD(node, DAG, width, height, num_of_mines)
+            create_x_CPD(node, DAG, height, width, num_of_mines)
 
 def create_y_CPD(node, DAG):
     neighbors = list(DAG.get_parents(node))
@@ -145,17 +145,16 @@ def create_y_CPD(node, DAG):
                             ], neighbors, [2 for n in neighbors])
     DAG.add_cpds(y_CPD)
     
-def create_x_CPD(node, DAG, width, height, num_of_mines):
+def create_x_CPD(node, DAG, height, width, num_of_mines):
     size = width*height
     prob_X = num_of_mines/size
     prob_no_X = 1 - prob_X
     x_CPD = pgmf.TabularCPD(node, 2, [[prob_no_X, prob_X]])
     DAG.add_cpds(x_CPD)
     
-def calcule_prob_X(DAG, i, j, evidences):
+def calcule_prob_X(variable_elimination, i, j, evidences):
     var_x = bn_X_name(i,j)
-    DAG_ev = pgmi.VariableElimination(DAG)
-    query = DAG_ev.query([var_x], evidences)
+    query = variable_elimination.query([var_x], evidences)
     query_res = query[var_x]
     return query_res.values[0]
 

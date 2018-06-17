@@ -2,3 +2,4 @@
 - Biblioteca "math": https://docs.python.org/3/library/math.html
 - Biblioteca "networkx": https://networkx.github.io/documentation/stable/index.html
 - Biblioteca "pgmpy": http://pgmpy.org/
+- Minimum Degree Heuristic: 
