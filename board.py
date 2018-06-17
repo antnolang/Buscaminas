@@ -1,4 +1,3 @@
-
 import random
 import math
 import operator
@@ -90,7 +89,7 @@ class Board():
             for j in range(self.width):
                 square = self.squares[i][j]
                 res += '* ' if square.is_mine else '{} '.format(square.neighbor_mines)
-            res += '\n '
+            res += '\n'
         
         return res
     
@@ -128,7 +127,7 @@ class Board():
             print('GAME OVER\n=================')
             print(self.print_revealed())
         else:
-            square.reveal()
+            self.reveal_Information(i, j)
             print(self.__str__())
             res = self.__suggest_next_square__()
             print('Suggested next square: {}'.format(res))
@@ -151,6 +150,7 @@ class Board():
             prob_X[(sq[0],sq[1])] = calcule_prob_X(self.bayesian_network, sq[0], sq[1], evidences)
         
         # DEBUGGING: return prob_X
+        # En caso de que haya dos valores máximos, devuelve el primero que encontró
         return max(prob_X.items(), key=operator.itemgetter(1))[0]
     
     def __get_evidences__(self, not_hidden):
