@@ -118,27 +118,10 @@ def drawDAG(DAG):
     nx.draw(nxg, with_labels=True, font_weight='bold')
     
 
-# Calcula la probabilidad de Y = y dadas las variables X vecinas como
-# evidencia.
-#
-# + Entradas:
-#     - y:    Número entero [0,8]. Estado de la variable Y a la que le queremos 
-#             calcular su probabilidad.
-#     - comb: Número entero positivo. Si por ejemplo consideramos una variable Y 
-#             con 3 vecinos X (x1, x2, x3), tenemos 2^3=8 combinaciones posibles
-#             para los estados de estos vecinos X: {000, 001, 010, 011, 100, 101, 
-#             110, 111}. El número comb representa cada una de estas 
-#             combinaciones (0 = 000, 1 = 001, 2 = 010, 3 = 011, etc.)
-#
-# + Salida: devuelve la probabilidad calculada. La probabilidad de 
-#           Y dada las variables de evidencia X solo puede ser:
-#     - 1:   Si el valor de Y es igual que el número de variables X con valor 1
-#     - 0:   Si el valor de Y es distinto al número de variables X con valor 1
-#
-# + Calcular número de variables X con valor 1: Pasamos comb a binario.
-#   Ahora tenemos el estado de todas las variables X vecinas de Y.
-#   Contando los 1's del número binario, obtenemos el número de
-#   variables X con valor 1.
+# Calcula la probabilidad de Y = y dados los valores de las variables X vecinas 
+# (codificadas en "comb") como evidencia:
+#     - 1.0: Si y == número de variables X con valor 1
+#     - 0.0: Si y != número de variables X con valor 1
 def prob_Y(y, comb):
     comb = format(comb, 'b')
     one_count = comb.count('1')
