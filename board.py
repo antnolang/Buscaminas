@@ -38,10 +38,10 @@ class Board():
     def __init__(self, height, width, num_of_mines):
         self.height = height
         self.width = width
+        self.num_of_mines = num_of_mines
         self.squares = [[Square() for j in range(width)] for i in range(height)]
         self.variable_elimination = VariableElimination(generateBN(height, width, num_of_mines))
         self.evidences = {}
-        
         self.__place_mines__(num_of_mines)
         
     # Coloca las minas en el tablero:
@@ -138,9 +138,12 @@ class Board():
         else:
             self.reveal_Information(i, j)
             print(self.__str__())
-            
-            suggested = self.__suggest_next_square__()
-            print('Suggested next square: {}'.format(suggested))
+            if self.__is_end_game__():
+                print('Congratulations!! \n Victory')
+                print(self.print_revealed())
+            else:
+                suggested = self.__suggest_next_square__()
+                print('Suggested next square: {}'.format(suggested))
 
             
     def __suggest_next_square__(self):
@@ -154,6 +157,10 @@ class Board():
         # En caso de que haya dos valores máximos, devuelve el primero que encontró
         return max(prob_X.items(), key=operator.itemgetter(1))[0]
         
+    def __is_end_game__(self):
+        hidden = self.__get_hidden_squares__()
+        return self.num_of_mines==len(hidden)
+    
     def __get_hidden_squares__(self):
         hidden = set()
         
