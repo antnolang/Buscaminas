@@ -42,7 +42,7 @@ class Board():
         self.squares = [[Square() for j in range(width)] for i in range(height)]
         self.variable_elimination = VariableElimination(generateBN(height, width, num_of_mines))
         self.evidences = {}
-        self.__place_mines__(num_of_mines)
+        self.__place_mines__()
         
     # Coloca las minas en el tablero:
     #     1.- Se genera un número aleatorio distinto por cada mina.
@@ -51,8 +51,8 @@ class Board():
     #     3.- Se coloca cada mina en la posición calculada.
     #     4.- Se actualiza "Square::neighbor_mines" de las casillas vecinas 
     #         de cada una de las minas (llamando a "__update_neighbors__()").
-    def __place_mines__(self, num_of_mines):
-        mines = random.sample(range(self.width * self.height), num_of_mines)
+    def __place_mines__(self):
+        mines = random.sample(range(self.width * self.height), self.num_of_mines)
         for m in mines:
             mine_position = self.__get_position__(m)
             i = mine_position[0]
