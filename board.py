@@ -2,12 +2,13 @@ import random
 import math
 import operator
 
+
 class Square():
     
-    def __init__(self, mine = False, neighbor_mines = 0, hidden = True):
-        self.is_mine        = mine
+    def __init__(self, mine=False, neighbor_mines=0, hidden=True):
+        self.is_mine = mine
         self.neighbor_mines = neighbor_mines
-        self.is_hidden      = hidden
+        self.is_hidden = hidden
         
     def reveal(self):
         self.is_hidden = False
@@ -20,43 +21,59 @@ class Square():
     
     # Delete later
     def __str__(self):
-        return 'X={0}, Y={1} and hidden={2}'.format(self.is_mine, self.neighbor_mines, self.is_hidden)
+        return 'X={0}, Y={1} and hidden={2}'.format(self.is_mine,
+                                                    self.neighbor_mines,
+                                                    self.is_hidden)
 
         
 # La casilla (0,0) corresponde a la esquina superior izquierda
 # Representación de posición: (i,j) ==> i: fila, j: columna
 class Board():
     
-    # Cada dupla corresponde a los valores que hay que sumar a una posición 
-    # determinada del tablero para calcular uno de sus 8 posibles vecinos.
+    # Cada dupla corresponde a los valores que hay que sumar
+    # a una posición determinada del tablero para calcular uno
+    # de sus 8 posibles vecinos.
     NEIGHBOR_POSITION = (
-        (-1,-1), (-1,0), (-1,1),
-        ( 0,-1),         ( 0,1),
-        ( 1,-1), ( 1,0), ( 1,1)
+        (-1, -1), (-1, 0), (-1, 1),
+        (0, -1), (0, 1), (1, -1),
+        (1, 0), (1, 1)
     )
     
     def __init__(self, height, width, num_of_mines):
         self.height = height
         self.width = width
         self.num_of_mines = num_of_mines
-        self.squares = [[Square() for j in range(width)] for i in range(height)]
-        self.variable_elimination = VariableElimination(generateBN(height, width, num_of_mines))
+        
+        self.squares = [
+            [Square() for j in range(width)]
+                      for i in range(height)
+        ]
+        self.variable_elimination = VariableElimination(
+            generateBN(height, width, num_of_mines))
+        
         self.evidences = {}
         self.__place_mines__()
         
     # Coloca las minas en el tablero:
-    #     1.- Se genera un número aleatorio distinto por cada mina.
-    #     2.- A cada número aleatorio se le asocia una casilla mediante 
-    #         "__get_position__()".
-    #     3.- Se coloca cada mina en la posición calculada.
-    #     4.- Se actualiza "Square::neighbor_mines" de las casillas vecinas 
-    #         de cada una de las minas (llamando a "__update_neighbors__()").
+    #   1.- Se genera un número aleatorio distinto
+    #       por cada mina.
+    #   2.- A cada número aleatorio se le asocia una casilla
+    #       mediante "__get_position__()".
+    #   3.- Se coloca cada mina en la posición calcu.
+    #   4.- Se actualiza "Square::neighbor_mines" de las
+    #       casillas vecinas de cada una de las minas
+    #       (llamando a "__update_neighbors__()").
+    
     def __place_mines__(self):
-        mines = random.sample(range(self.width * self.height), self.num_of_mines)
+        mines = random.sample(range(self.width * self.height),
+                              self.num_of_mines)
+        
         for m in mines:
             mine_position = self.__get_position__(m)
+            
             i = mine_position[0]
             j = mine_position[1]
+            
             square = self.squares[i][j]
             square.set_mine()
             
@@ -89,7 +106,7 @@ class Board():
                 or j >= self.width 
                 or i < 0 
                 or i >= self.height
-        )
+               )
     
     # DEBUGGING
     def print_revealed(self):
@@ -106,42 +123,45 @@ class Board():
     # DEBUGGING
     def showSelectedSquare(self, i, j):
         square = self.squares[i][j]
+        
         print(square)
     
-    def getSquare(self,i,j):
+    # DEBUGGING
+    def getSquare(self, i, j):
         return self.squares[i][j]
     
-    # P=(i,j): casilla que se encuentra en las coordenadas (i,j) del tablero.
-    # Debe mostrar la información de aquellas casillas vecinas hasta que se topa con una cuya Y>=1
-    # Flood fill algorithm
-    def reveal_Information(self, i, j):
+    # P=(i,j): casilla que se encuentra en las coordenadas (i,j)
+    # del tablero. Debe mostrar la información de aquellas
+    # casillas vecinas hasta que se topa con una cuya Y>=1
+    # Flood fill algorithm: https://en.wikipedia.org/wiki/Flood_fill
+    def reveal_information(self, i, j):
         if not (self.__invalid_position__(i, j)):        
             square = self.squares[i][j]
             if square.is_mine==False and square.is_hidden==True:
                 if square.neighbor_mines==0:
                     square.reveal()
-                    self.reveal_Information(i+1,j)
-                    self.reveal_Information(i-1,j)
-                    self.reveal_Information(i,j+1)
-                    self.reveal_Information(i,j-1)
-                    self.reveal_Information(i+1,j+1)
-                    self.reveal_Information(i+1,j-1)
-                    self.reveal_Information(i-1,j+1)
-                    self.reveal_Information(i-1,j-1)
+                    self.reveal_information(i+1, j)
+                    self.reveal_information(i-1, j)
+                    self.reveal_information(i, j+1)
+                    self.reveal_information(i, j-1)
+                    self.reveal_information(i+1, j+1)
+                    self.reveal_information(i+1, j-1)
+                    self.reveal_information(i-1, j+1)
+                    self.reveal_information(i-1, j-1)
                 else:
                     square.reveal()
+                
                 self.__add_evidence__(i, j)
             
 
     def reveal(self, i, j):
         square = self.squares[i][j]
-        #hidden = self.__get_hidden_squares__()
         
         if square.is_mine:
             print('GAME OVER\n=================')
             print(self.print_revealed())
         else:
-            self.reveal_Information(i, j)
+            self.reveal_information(i, j)
             print(self.__str__())
             self.__suggest_next_square__()
             
@@ -151,15 +171,20 @@ class Board():
         hidden = self.__get_hidden_squares__()
         
         if self.__is_end_game__(hidden):
-                print('Congratulations!! \n Victory')
-                print(self.print_revealed())
+            print('Congratulations!! \n Victory')
+            print(self.print_revealed())
         else: 
             for sq in hidden:
-                prob_X[(sq[0],sq[1])] = calcule_prob_X(self.variable_elimination, sq[0], sq[1], self.evidences)
+                prob_X[(sq[0],sq[1])] = calcule_prob_X(self.variable_elimination,
+                                                       sq[0],
+                                                       sq[1],
+                                                       self.evidences)
             
             # DEBUGGING: return prob_X
-            # En caso de que haya dos valores máximos, asigna el primero que encontró
-            suggested = max(prob_X.items(), key=operator.itemgetter(1))[0]
+            # En caso de que haya dos valores máximos, 
+            # asigna el primero que encontró
+            suggested = max(prob_X.items(),
+                            key=operator.itemgetter(1))[0]
             print('Suggested next square: {}'.format(suggested))
         
     def __is_end_game__(self, hidden):
@@ -180,6 +205,7 @@ class Board():
         square = self.squares[i][j]
         X = bn_X_name(i, j)
         Y = bn_Y_name(i, j)
+        
         self.evidences[X] = int(square.is_mine)
         self.evidences[Y] = square.neighbor_mines
         # DEBUGGING: print('=============================\n{}\n============================='.format(self.evidences))

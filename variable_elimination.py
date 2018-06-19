@@ -37,40 +37,50 @@ class VariableElimination(Inference):
         # Dealing with the case when variables is not provided.
         if not variables:
             all_factors = []
+            
             for factor_li in self.factors.values():
                 all_factors.extend(factor_li)
+            
             return set(all_factors)
 
         eliminated_variables = set()
         
-        # --MODIFICADO: Ya que las evidencias son fijas en cada partida, aplicamos las 
-        #               evidencias de forma permanente en la red bayesiana, además de
-        #               aplicarlas sobre la copia de los factores (working_factors).
+        # --MODIFICADO:
+        #     Ya que las evidencias son fijas en cada partida,
+        #     aplicamos las evidencias de forma permanente en
+        #     la red bayesiana, además de aplicarlas sobre la
+        #     copia de los factores (working_factors).
         #               
-        #               Además inicializamos working_factors solo con los factores de
-        #               las variables relevantes:  "Toda variable que no sea antecesor
-        #               (en la red) de alguna de las variables de consulta o de
-        #               evidencia, es irrelevante para la consulta"
+        #     Además inicializamos working_factors solo con
+        #     los factores de las variables relevantes:
+        #     "Toda variable que no sea antecesor (en la red)
+        #     de alguna de las variables de consulta o de
+        #     evidencia, es irrelevante para la consulta"
         
         if evidence:
             for evidence_var in evidence:
                 for factor in self.factors[evidence_var]:
-                    factor_reduced = factor.reduce([(evidence_var, evidence[evidence_var])], inplace=False)
+                    factor_reduced = factor.reduce([(evidence_var,
+                                                    evidence[evidence_var])],
+                                                    inplace=False)
                     for var in factor_reduced.scope():
                         self.factors[var].remove(factor)
                         self.factors[var].append(factor_reduced)
                         
                 del self.factors[evidence_var]
                 
-        #               En este problema en concreto:
-        #                   - Las variables de consulta (que siempre serán variables X) nunca tendrán padres 
-        #                     ==> solo tenemos que calcular lo antecesores de las variables de evidencia.
-        #                   - Las variables de evidencia son "eliminadas" en el bloque if-else de arriba
-        #                     ==> dejan de ser variables relevantes
-        #                   - Las variables X no tienen antecesores, y las variables Y solo tienen como 
-        #                     antecesores sus padres directos (es decir, no tienen abuelos)
-        #                     ==> no es necesario un algoritmo recursivo para calcular los antecesores de
-        #                         las variables de evidencia.
+        # En este problema en concreto:
+        #    - Las variables de consulta (que siempre serán variables X)
+        #      nunca tendrán padres ==> solo tenemos que calcular los
+        #      antecesores de las variables de evidencia.
+        #    - Las variables de evidencia son "eliminadas" en el bloque
+        #      if-else de arriba ==> dejan de ser variables relevantes
+        #    - Las variables X no tienen antecesores, y las variables Y
+        #      solo tienen como antecesores sus padres directos
+        #      (es decir, no tienen abuelos) ==> no es necesario un
+        #      algoritmo recursivo para calcular los antecesores de
+        #      las variables de evidencia.
+        
         relevant_variables = set(variables)
         for e in evidence.keys():
             parents = self.model.get_parents(e)
@@ -84,8 +94,8 @@ class VariableElimination(Inference):
         # --
                 
         if not elimination_order:
-            # --MODIFICADO: Min-Degree Heuristic. Eliminamos primero las variables 
-            #               con menos vecinos
+            # --MODIFICADO: Min-Degree Heuristic. Eliminamos primero
+            #     las variables con menos vecinos
             
             ordered_degree = sorted(self.model.degree, key=lambda node: node[1])
             ordered_nodes = [node[0] for node in ordered_degree]
