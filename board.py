@@ -34,23 +34,18 @@ class Board():
     # a una posición determinada del tablero para calcular uno
     # de sus 8 posibles vecinos.
     NEIGHBOR_POSITION = (
-        (-1, -1), (-1, 0), (-1, 1),
-        (0, -1), (0, 1), (1, -1),
-        (1, 0), (1, 1)
+        (-1, -1), (-1,0), (-1, 1),
+        ( 0, -1),         ( 0, 1),
+        ( 1, -1), ( 1,0), (1, 1)
     )
     
     def __init__(self, height, width, num_of_mines):
         self.height = height
         self.width = width
         self.num_of_mines = num_of_mines
-        
-        self.squares = [
-            [Square() for j in range(width)]
-                      for i in range(height)
-        ]
+        self.squares = [[Square() for j in range(width)] for i in range(height)]
         self.variable_elimination = VariableElimination(
             generateBN(height, width, num_of_mines))
-        
         self.evidences = {}
         self.__place_mines__()
         
@@ -151,8 +146,7 @@ class Board():
                 else:
                     square.reveal()
                 
-                self.__add_evidence__(i, j)
-            
+                self.__add_evidence__(i, j)            
 
     def reveal(self, i, j):
         square = self.squares[i][j]
@@ -164,8 +158,7 @@ class Board():
             self.reveal_information(i, j)
             print(self.__str__())
             self.__suggest_next_square__()
-            
-            
+                 
     def __suggest_next_square__(self):
         prob_X = {}
         hidden = self.__get_hidden_squares__()
@@ -183,8 +176,7 @@ class Board():
             # DEBUGGING: return prob_X
             # En caso de que haya dos valores máximos, 
             # asigna el primero que encontró
-            suggested = max(prob_X.items(),
-                            key=operator.itemgetter(1))[0]
+            suggested = max(prob_X.items(), key=operator.itemgetter(1))[0]
             print('Suggested next square: {}'.format(suggested))
         
     def __is_end_game__(self, hidden):

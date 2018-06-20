@@ -37,10 +37,8 @@ class VariableElimination(Inference):
         # Dealing with the case when variables is not provided.
         if not variables:
             all_factors = []
-            
             for factor_li in self.factors.values():
                 all_factors.extend(factor_li)
-            
             return set(all_factors)
 
         eliminated_variables = set()
@@ -60,9 +58,7 @@ class VariableElimination(Inference):
         if evidence:
             for evidence_var in evidence:
                 for factor in self.factors[evidence_var]:
-                    factor_reduced = factor.reduce([(evidence_var,
-                                                    evidence[evidence_var])],
-                                                    inplace=False)
+                    factor_reduced = factor.reduce([(evidence_var, evidence[evidence_var])], inplace=False)
                     for var in factor_reduced.scope():
                         self.factors[var].remove(factor)
                         self.factors[var].append(factor_reduced)
