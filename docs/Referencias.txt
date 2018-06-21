@@ -1,0 +1,8 @@
+- Biblioteca "random": https://docs.python.org/3/library/random.html
+- Biblioteca "math": https://docs.python.org/3/library/math.html
+- Biblioteca "networkx": https://networkx.github.io/documentation/stable/index.html
+- Biblioteca "pgmpy": http://pgmpy.org/
+- Minimum Degree Heuristic:
+- Iconos: 
+	+ Icono ventana: <div>Iconos diseñados por <a href="https://www.flaticon.es/autores/creaticca-creative-agency" title="Creaticca Creative Agency">Creaticca Creative Agency</a> desde <a href="https://www.flaticon.es/" title="Flaticon">www.flaticon.com</a> con licencia <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+	+ Icono mina: <div>Iconos diseñados por <a href="https://www.flaticon.es/autores/creaticca-creative-agency" title="Creaticca Creative Agency">Creaticca Creative Agency</a> desde <a href="https://www.flaticon.es/" title="Flaticon">www.flaticon.com</a> con licencia <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
