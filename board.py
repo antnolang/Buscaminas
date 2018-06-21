@@ -36,7 +36,7 @@ class Board():
     NEIGHBOR_POSITION = (
         (-1, -1), (-1,0), (-1, 1),
         ( 0, -1),         ( 0, 1),
-        ( 1, -1), ( 1,0), (1, 1)
+        ( 1, -1), ( 1,0), (1, 1 )
     )
     
     def __init__(self, height, width, num_of_mines):
@@ -149,15 +149,17 @@ class Board():
                 self.__add_evidence__(i, j)            
 
     def reveal(self, i, j):
-        square = self.squares[i][j]
+        if not self.__invalid_position__(i, j):
+            square = self.squares[i][j]
         
-        if square.is_mine:
-            print('GAME OVER\n=================')
-            print(self.print_revealed())
-        else:
-            self.reveal_information(i, j)
-            print(self.__str__())
-            self.__suggest_next_square__()
+            if square.is_mine:
+                print('GAME OVER\n=================')
+                print(self.print_revealed())
+            else:
+                self.reveal_information(i, j)
+                print(self.__str__())
+                (i, j) = self.__suggest_next_square__()
+                self.reveal(i, j)
                  
     def __suggest_next_square__(self):
         prob_X = {}
@@ -166,6 +168,7 @@ class Board():
         if self.__is_end_game__(hidden):
             print('Congratulations!! \n Victory')
             print(self.print_revealed())
+            return (-1, -1)
         else: 
             for sq in hidden:
                 prob_X[(sq[0],sq[1])] = calcule_prob_X(self.variable_elimination,
@@ -177,7 +180,9 @@ class Board():
             # En caso de que haya dos valores máximos, 
             # asigna el primero que encontró
             suggested = max(prob_X.items(), key=operator.itemgetter(1))[0]
+            
             print('Suggested next square: {}'.format(suggested))
+            return suggested
         
     def __is_end_game__(self, hidden):
         return self.num_of_mines==len(hidden)
@@ -212,4 +217,20 @@ class Board():
             res += '\n'
         
         return res
+    
+    def __play_game__(self):
+        
+        # Al principio de la partida, todas las casillas tienen
+        # las mismas posibilidades de contener una mina. Por tanto,
+        # el algoritmo debe despejar una cualquiera
+        i = random.sample(range(self.height), 1)[0]
+        j = random.sample(range(self.width), 1)[0]
+        
+        print(self.__str__())
+        print('Suggested square: ({0}, {1})'.format(i, j))
+        
+        # Esta función se ejecuta recursivamente hasta que termina la partida
+        self.reveal(i, j)
+        
+        
     
