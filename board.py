@@ -2,6 +2,12 @@ import random
 import math
 import operator
 
+from PyQt5 import QtGui
+from PyQt5.QtCore import QSize, QObject, Qt
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QLayout, 
+                             QHBoxLayout, QPushButton, QWidget, QGridLayout,
+                             QLabel, QStatusBar, QFrame, QDockWidget)
+
 import square as sq
 import variable_elimination as ve
 import bayesian_network as bn
@@ -15,23 +21,104 @@ NEIGHBOR_POSITION = (
     ( 0, -1),          ( 0, 1),
     ( 1, -1), ( 1, 0), ( 1, 1)
 )
+
+SQUARE_SIZE = QSize(22, 22)
+
+IMAGE_ICON = 'images/icon(32).png'
+IMAGE_MINE = 'images/mina(32).png'
+IMAGE_FLAG = 'images/flag.png'
  
- 
+
 # La casilla (0,0) corresponde a la esquina superior izquierda
 # Representación de posición: (i,j) ==> i: fila, j: columna
-class Board():
-    
+class Board(QMainWindow):
+
     def __init__(self, height, width, num_of_mines):
+        super().__init__()
+
         self.height = height
         self.width = width
         self.num_of_mines = num_of_mines
         self.evidences = {}
         self.variable_elimination = ve.VariableElimination(
             bn.generateBN(height, width, num_of_mines))
-        self.squares = [
-                     [sq.Square() for j in range(width)] for i in range(height)
-        ]
+
+        self.initUi()
         self.place_mines()
+
+    def init_squares(self):
+        for i in range(self.height):
+            for j in range(self.width):
+                square = sq.Square()
+                square.setProperty('i', i)
+                square.setProperty('j', j)
+                square.setFixedSize(SQUARE_SIZE)
+                square.left_click.connect(self.handle_left_click)
+                square.square_revealed.connect(self.display_square)
+                square.flag.connect(self.handle_flag)
+                
+                self.squares.addWidget(square, i, j)
+
+    def initUi(self):
+        self.squares = QGridLayout()
+        self.squares.setSpacing(0)
+        self.squares.setSizeConstraint(QLayout.SetFixedSize)
+        self.init_squares()
+
+        self.game_mine_count = self.num_of_mines
+        self.label_mine_count = QLabel('Contador de minas: {0}/{1}'
+                              .format(self.game_mine_count, self.num_of_mines))
+
+        hor_bot_box = QHBoxLayout()
+        hor_bot_box.addLayout(self.squares)
+        
+        vert_box = QVBoxLayout()
+        vert_box.addLayout(hor_bot_box)
+
+        main_widget = QWidget()
+        main_widget.setLayout(vert_box)
+
+        status_bar = QStatusBar()
+        status_bar.addWidget(self.label_mine_count)
+
+        self.setCentralWidget(main_widget)
+        self.setStatusBar(status_bar)
+        self.setWindowTitle('Buscaminas')
+        self.setWindowIcon(QtGui.QIcon(IMAGE_ICON))
+        self.show()
+
+    def handle_left_click(self):
+        square = self.sender()
+        self.reveal(square.property('i'), square.property('j'))
+
+    def display_square(self):
+        square = self.sender()
+        square.setFlat(True)
+        square.setEnabled(False)
+        square.setStyleSheet('color: black')   
+
+        if square.is_mine:
+            icon = QtGui.QIcon()
+            icon.addPixmap(QtGui.QPixmap(IMAGE_MINE), QtGui.QIcon.Disabled)
+            square.setIcon(icon)
+        elif square.neighbor_mines != 0:
+            square.setText(str(square.neighbor_mines))
+
+    def handle_flag(self):
+        square = self.sender()
+        if square.flagged:
+            self.game_mine_count -= 1
+            square.setIcon(QtGui.QIcon(IMAGE_FLAG))
+            self.label_mine_count.setText('Contador de minas: {0}/{1}'
+                              .format(self.game_mine_count, self.num_of_mines))
+        else:
+            self.game_mine_count += 1
+            square.setIcon(QtGui.QIcon())
+            self.label_mine_count.setText('Contador de minas: {0}/{1}'
+                              .format(self.game_mine_count, self.num_of_mines))
+
+    def get_square(self, i, j):
+        return self.squares.itemAtPosition(i, j).widget()
         
     # Coloca las minas en el tablero:
     #   1.- Se genera un número aleatorio distinto
@@ -52,8 +139,7 @@ class Board():
             i = mine_position[0]
             j = mine_position[1]
             
-            square = self.squares[i][j]
-            square.set_mine()
+            self.get_square(i, j).set_mine()
             
             self.update_neighbors(i, j)
     
@@ -75,8 +161,7 @@ class Board():
             ni = i + NEIGHBOR_POSITION[n][0]
             nj = j + NEIGHBOR_POSITION[n][1]
             if not (self.invalid_position(ni, nj)):
-                neighbor = self.squares[ni][nj]
-                neighbor.inc_neighbor_mines()
+                self.get_square(ni, nj).inc_neighbor_mines()
     
     # Tiene en cuenta los límites del tablero
     def invalid_position(self, i, j):
@@ -87,7 +172,7 @@ class Board():
                )
                
     def reveal(self, i, j):
-        square = self.squares[i][j]
+        square = self.get_square(i, j)
     
         if square.is_mine:
             print('GAME OVER\n=================')
@@ -111,7 +196,7 @@ class Board():
     # Flood fill algorithm: https://en.wikipedia.org/wiki/Flood_fill
     def reveal_information(self, i, j):
         if not (self.invalid_position(i, j)):        
-            square = self.squares[i][j]
+            square = self.get_square(i, j)
             if square.is_mine==False and square.is_hidden==True:
                 square.reveal()
                 self.add_evidence(i, j)
@@ -140,7 +225,7 @@ class Board():
         return suggested
             
     def add_evidence(self, i, j):
-        square = self.squares[i][j]
+        square = self.get_square(i, j)
         X = bn.bn_X_name(i, j)
         Y = bn.bn_Y_name(i, j)
         
@@ -153,7 +238,7 @@ class Board():
         
         for j in range(self.width):
             for i in range(self.height):
-                square = self.squares[i][j]
+                square = self.get_square(i, j)
                 if square.is_hidden:
                     hidden.add((i,j))
                     
@@ -165,12 +250,14 @@ class Board():
         
         return revealed_square_count == board_len - self.num_of_mines
         
+    # TODO: Imprime tanto en interfaz gráfica como en consola.
     def print_revealed(self):
         res = ''
         
         for i in range(self.height):
             for j in range(self.width):
-                square = self.squares[i][j]
+                square = self.get_square(i, j)
+                square.reveal()
                 if square.is_mine:
                     res += '* '
                 else:
@@ -199,13 +286,9 @@ class Board():
             
     # DEBUGGING
     def showSelectedSquare(self, i, j):
-        square = self.squares[i][j]
+        square = self.get_square(i, j)
         
         print(square)
-    
-    # DEBUGGING
-    def getSquare(self, i, j):
-        return self.squares[i][j]
         
         
     def __str__(self):
@@ -213,7 +296,7 @@ class Board():
         
         for i in range(self.height):
             for j in range(self.width):
-                square = self.squares[i][j]
+                square = self.get_square(i, j)
                 if square.is_hidden:
                     res += '_ '
                 else:

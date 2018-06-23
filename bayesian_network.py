@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import networkx as nx                  # Permite trabajar con grafos
 import pgmpy.models as pgmm            # Modelos gráficos de probabilidad
 import pgmpy.factors.discrete as pgmf  # Tablas de probabilidades condicionales
