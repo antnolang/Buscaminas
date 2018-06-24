@@ -1,8 +1,6 @@
-import networkx as nx                  # Permite trabajar con grafos
 import pgmpy.models as pgmm            # Modelos gráficos de probabilidad
 import pgmpy.factors.discrete as pgmf  # Tablas de probabilidades condicionales
                                        # y factores de probabilidad
-import pgmpy.inference as pgmi         # Inferencia probabilística exacta
 
 
 # Para definir la red bayesiana del juego Buscaminas,
@@ -104,18 +102,6 @@ def generateDAG(height, width):
                                                       ('X'+str(i-1)+str(j+1), 'Y'+str(i)+str(j))])         
     
     return modelo_buscaminas
-
-
-# TODO: Esta función y los imports networkx y matplotlib.pyplot
-# están de manera temporal para poder imprimir el grafo.
-# Eliminar todo esto en la versión final.
-def drawDAG(DAG):
-    nxg = nx.Graph()
-    
-    nxg.add_nodes_from(DAG.nodes())
-    nxg.add_edges_from(DAG.edges())
-    
-    nx.draw(nxg, with_labels=True, font_weight='bold')
     
 
 # Calcula la probabilidad de Y = y dados los valores de las

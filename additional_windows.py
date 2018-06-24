@@ -1,12 +1,11 @@
 from PyQt5 import QtGui
-from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QLabel, QGridLayout,
                              QLayout, QSpinBox, QPushButton, QDialogButtonBox,
                              QMessageBox)
 
 
 TEXT_RULES = '<h1>Reglas básicas del buscaminas</h1><p>El juego consiste en despejar todas las casillas de una pantalla que no oculten una mina.</p><p>Algunas casillas tienen un número, el cual indica la cantidad de minas que hay en las casillas circundantes. Así, si una casilla tiene el número 3, significa que de las ocho casillas que hay alrededor (si no es en una esquina o borde) hay 3 con minas y 5 sin minas. Si se descubre una casilla sin número indica que ninguna de las casillas vecinas tiene mina y éstas se descubren automáticamente.</p><p>Si se descubre una casilla con una mina se pierde la partida.</p><p>Se puede poner una marca en las casillas que el jugador piensa que hay minas para ayudar a descubrir las que están cerca.</p><h3>Controles</h3><p>Para descubrir una casilla oculta basta con hacer click izquierdo sobre ella y para marcarla, click derecho sobre la misma.</p><p>Las marcas se pueden poner y quitar pulsando repetidamente click derecho sobre la casilla.</p><p>Solo se pueden descubrir (click izquierdo) casillas que no estén marcadas.</p>'
-TEXT_SUGGESTION = '<h1>Mecanismo de sugerencia de casillas</h1><p>La implementación de este buscaminas incluye un mecanismo que sugiere las casillas con menor probabilidad de contener una mina.</p><p>Las minas sugeridas son aquellas con el fondo de color verde.</p><p>El mecanismo de sugerencia está basado en redes bayesianas y calcula las probabilidades mediante inferencia exacta. Sin embargo, al tratarse de una sugerencia probabilística, habrá casos en los que la casilla sugerida pueda contener una mina.</p>'
+TEXT_SUGGESTION = '<h1>Mecanismo de sugerencia de casillas</h1><p>La implementación de este buscaminas incluye un mecanismo que sugiere las casillas con menor probabilidad de contener una mina.</p><p>Las minas sugeridas son aquellas con el fondo de color verde.</p><p>El mecanismo de sugerencia está basado en redes bayesianas y calcula las probabilidades mediante inferencia exacta. Sin embargo, al tratarse de una sugerencia probabilística, habrá casos en los que la casilla sugerida pueda contener una mina.</p><h3>Resolución automática</h3><p>El juego también posee una opción para la resolución automática del juego usando el mismo mecanismo de sugerencia. Como se ha mencionado anteriormente, este mecanismo de sugerencia es probabilístico, por lo que habrá ocasiones en las que la propia resolución automática falle.</p><p>Para usar esta opción, seleccionar en el menú Juego &gt; Resolver automáticamente, o pulsar Ctrl+A.</p><p>En caso de usar la resolución automática, se puede ver en la pantalla del terminal la posición de las casillas que ha ido seleccionando el mecanismo.</p>'
 
 IMAGE_ICON = 'images/icon.png'
 
@@ -125,7 +124,7 @@ class HelpSuggestion(Help):
 
     def __init__(self):
         super().__init__(TEXT_SUGGESTION)
-        self.setGeometry(0, 0, 700, 250)
+        self.setGeometry(0, 0, 700, 400)
 
 
 class EndGame(QMessageBox):

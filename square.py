@@ -16,6 +16,7 @@ class Square(QPushButton):
         self.is_hidden = hidden
         self.flagged = flag
         
+
     def reveal(self):
         self.is_hidden = False
         self.square_revealed.emit()
@@ -26,9 +27,9 @@ class Square(QPushButton):
     def inc_neighbor_mines(self):
         self.neighbor_mines += 1
 
-
     def change_flagged_state(self):
         self.flagged = not self.flagged
+
 
     def mousePressEvent(self, e):
         if (e.button()==Qt.LeftButton and self.is_hidden and not self.flagged):
@@ -38,7 +39,7 @@ class Square(QPushButton):
             self.flag.emit()
             
     
-    # Delete later
+    # TODO: Delete later
     def __str__(self):
         return 'X={0}, Y={1} and hidden={2}'.format(self.is_mine,
                                                     self.neighbor_mines,
