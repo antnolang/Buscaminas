@@ -6,11 +6,12 @@ from PyQt5 import QtGui
 from PyQt5.QtCore import QSize, QObject, Qt
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QLayout, 
                              QHBoxLayout, QPushButton, QWidget, QGridLayout,
-                             QLabel, QStatusBar, QFrame, QDockWidget)
+                             QLabel, QStatusBar, QFrame, QDockWidget, QAction)
 
 import square as sq
 import variable_elimination as ve
 import bayesian_network as bn
+import additional_windows as aux_windows
 
 
 # Cada dupla corresponde a los valores que hay que sumar
@@ -22,11 +23,14 @@ NEIGHBOR_POSITION = (
     ( 1, -1), ( 1, 0), ( 1, 1)
 )
 
-SQUARE_SIZE = QSize(22, 22)
+SQUARE_SIZE = QSize(24, 24)
 
-IMAGE_ICON = 'images/icon(32).png'
-IMAGE_MINE = 'images/mina(32).png'
+IMAGE_ICON = 'images/icon.png'
+IMAGE_MINE = 'images/mina.png'
 IMAGE_FLAG = 'images/flag.png'
+
+NUMBER_COLORS = ['', 'blue', 'green', 'red', 'blueViolet', 
+                 'brown', 'yellow', 'aquamarine', 'black']
  
 
 # La casilla (0,0) corresponde a la esquina superior izquierda
@@ -40,6 +44,7 @@ class Board(QMainWindow):
         self.width = width
         self.num_of_mines = num_of_mines
         self.evidences = {}
+        self.suggested_square = None
         self.variable_elimination = ve.VariableElimination(
             bn.generateBN(height, width, num_of_mines))
 
@@ -60,15 +65,40 @@ class Board(QMainWindow):
                 self.squares.addWidget(square, i, j)
 
     def initUi(self):
+        # Inicializar la barra del menú
+        menu = self.menuBar()
+        game_menu = menu.addMenu('Juego')
+        help_menu = menu.addMenu('Ayuda')
+
+        new_game_action = QAction('Nueva partida', self)
+        new_game_action.setShortcut('Ctrl+N')
+        new_game_action.triggered.connect(self.new_game)
+        restart_action = QAction('Configurar partida', self)
+        restart_action.setShortcut('Ctrl+C')
+        restart_action.triggered.connect(self.conf_dialog)
+        game_menu.addAction(new_game_action)
+        game_menu.addAction(restart_action)
+
+        rules = QAction('Reglas del juego del Buscaminas', self)
+        rules.triggered.connect(self.rules_dialog)
+        suggest_mechanism = QAction('Mecanismo de sugerencia', self)
+        suggest_mechanism.triggered.connect(self.suggest_dialog)
+        help_menu.addAction(rules)
+        help_menu.addAction(suggest_mechanism)
+        
+        # Inicializar el tablero de casillas
         self.squares = QGridLayout()
         self.squares.setSpacing(0)
         self.squares.setSizeConstraint(QLayout.SetFixedSize)
         self.init_squares()
 
+        # Inicializar la barra de estado
         self.game_mine_count = self.num_of_mines
+        # TODO: Si yo queiro cambiar el mensaje este que?
         self.label_mine_count = QLabel('Contador de minas: {0}/{1}'
                               .format(self.game_mine_count, self.num_of_mines))
 
+        # Configuración de layouts de la ventana
         hor_bot_box = QHBoxLayout()
         hor_bot_box.addLayout(self.squares)
         
@@ -81,21 +111,35 @@ class Board(QMainWindow):
         status_bar = QStatusBar()
         status_bar.addWidget(self.label_mine_count)
 
+        # Pasar a QMainWindow los layouts con los elementos inicializados
         self.setCentralWidget(main_widget)
         self.setStatusBar(status_bar)
+        self.setMenuBar(menu)
+
+        # Inicialización del resto de atributos de la ventana
         self.setWindowTitle('Buscaminas')
         self.setWindowIcon(QtGui.QIcon(IMAGE_ICON))
         self.show()
 
     def handle_left_click(self):
+        previous_sugg_sq = self.suggested_square
+        if previous_sugg_sq:
+            previous_sugg_sq.setStyleSheet('')
+
         square = self.sender()
-        self.reveal(square.property('i'), square.property('j'))
+        i = square.property('i')
+        j = square.property('j')
+        suggested_pos = self.reveal(i, j)
+
+        if suggested_pos:
+            suggested_sq = self.get_square(suggested_pos[0], suggested_pos[1])
+            suggested_sq.setStyleSheet('background-color: green')
+            self.suggested_square = suggested_sq
 
     def display_square(self):
         square = self.sender()
         square.setFlat(True)
-        square.setEnabled(False)
-        square.setStyleSheet('color: black')   
+        square.setEnabled(False) 
 
         if square.is_mine:
             icon = QtGui.QIcon()
@@ -103,6 +147,8 @@ class Board(QMainWindow):
             square.setIcon(icon)
         elif square.neighbor_mines != 0:
             square.setText(str(square.neighbor_mines))
+            square.setStyleSheet('font-weight: bold; color: {0};'
+                                 .format(NUMBER_COLORS[square.neighbor_mines]))
 
     def handle_flag(self):
         square = self.sender()
@@ -116,6 +162,22 @@ class Board(QMainWindow):
             square.setIcon(QtGui.QIcon())
             self.label_mine_count.setText('Contador de minas: {0}/{1}'
                               .format(self.game_mine_count, self.num_of_mines))
+
+    def new_game(self):
+        self.close()
+        self.__init__(self.height, self.width, self.num_of_mines)
+
+    def conf_dialog(self):
+        conf_window = aux_windows.Configuration(self)
+        conf_window.exec()
+
+    def rules_dialog(self):
+        help_window = aux_windows.HelpRules()
+        help_window.exec()
+
+    def suggest_dialog(self):
+        suggest_window = aux_windows.HelpSuggestion()
+        suggest_window.exec()
 
     def get_square(self, i, j):
         return self.squares.itemAtPosition(i, j).widget()
@@ -177,6 +239,8 @@ class Board(QMainWindow):
         if square.is_mine:
             print('GAME OVER\n=================')
             print(self.print_revealed())
+            end_window = aux_windows.EndGame(False)
+            end_window.exec()
             return False
         else:
             self.reveal_information(i, j)
@@ -185,6 +249,8 @@ class Board(QMainWindow):
         if self.is_end_game():
             print('Congratulations!! \n Victory')
             print(self.print_revealed())
+            end_window = aux_windows.EndGame(True)
+            end_window.exec()
             return False
         else:
             (i, j) = self.suggest_next_square()
