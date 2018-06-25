@@ -280,18 +280,19 @@ class Board(QMainWindow):
 
     # Las siguientes funciones corresponden a los "slots" de Board():
     def play_game(self):
-        print('Pasos de la resolución automática:\n')
-        while(self.suggested_pos):
-            i = self.suggested_pos[0]
-            j = self.suggested_pos[1]
-            self.reveal(i, j)
-            print('{0}\nCasilla seleccionada: {1}\n==========================='
-                  .format(self, (i, j)))
+        if self.suggested_pos:
+            print('Pasos de la resolución automática:\n')
+            while(self.suggested_pos):
+                i = self.suggested_pos[0]
+                j = self.suggested_pos[1]
+                self.reveal(i, j)
+                print('{0}\nCasilla seleccionada: {1}\n'.format(self, (i, j)))
+                print('============================')
 
-        if self.get_square(i, j).is_mine:
-            print('\tDERROTA\n===========================')
-        else:
-            print('\tVICTORIA\n===========================')
+            if self.get_square(i, j).is_mine:
+                print('\tDERROTA\n============================')
+            else:
+                print('\tVICTORIA\n===========================')
 
     def handle_left_click(self):
         i = self.suggested_pos[0]
