@@ -290,9 +290,9 @@ class Board(QMainWindow):
                 print('============================')
 
             if self.get_square(i, j).is_mine:
-                print('\tDERROTA\n============================')
+                print('\tDERROTA\n=============================')
             else:
-                print('\tVICTORIA\n===========================')
+                print('\tVICTORIA\n=============================')
 
     def handle_left_click(self):
         i = self.suggested_pos[0]
@@ -323,14 +323,16 @@ class Board(QMainWindow):
 
     def handle_flag(self):
         square = self.sender()
-        if square.flagged:
-            self.game_mine_count -= 1
+        if not square.flagged and not self.game_mine_count == 0:
+            square.change_flagged_state()
             square.setIcon(QtGui.QIcon(IMAGE_FLAG))
+            self.game_mine_count -= 1
             self.label_mine_count.setText('Contador de minas: {0}/{1}'
                               .format(self.game_mine_count, self.num_of_mines))
-        else:
-            self.game_mine_count += 1
+        elif square.flagged:
+            square.change_flagged_state()
             square.setIcon(QtGui.QIcon())
+            self.game_mine_count += 1
             self.label_mine_count.setText('Contador de minas: {0}/{1}'
                               .format(self.game_mine_count, self.num_of_mines))
 

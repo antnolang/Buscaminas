@@ -35,7 +35,6 @@ class Square(QPushButton):
         if (e.button()==Qt.LeftButton and self.is_hidden and not self.flagged):
             self.left_click.emit()
         elif (e.button()==Qt.RightButton and self.is_hidden):
-            self.change_flagged_state()
             self.flag.emit()
             
     
