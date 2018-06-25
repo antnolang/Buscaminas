@@ -5,7 +5,7 @@ import operator
 from PyQt5 import QtGui
 from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import (QMainWindow, QVBoxLayout, QHBoxLayout, QLayout, 
-                             QPushButton, QWidget, QGridLayout, QLabel
+                             QPushButton, QWidget, QGridLayout, QLabel,
                              QStatusBar, QAction)
 
 import square as sq
