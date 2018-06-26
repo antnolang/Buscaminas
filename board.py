@@ -46,7 +46,7 @@ class Board(QMainWindow):
         self.evidences = {}
         self.suggested_pos = (0, 0)
         self.variable_elimination = ve.VariableElimination(
-            bn.generateBN(height, width, num_of_mines))
+            bn.generate_BN(height, width, num_of_mines))
 
         self.initUi()
         self.place_mines()

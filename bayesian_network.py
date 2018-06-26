@@ -6,8 +6,8 @@ import pgmpy.factors.discrete as pgmf  # Tablas de probabilidades condicionales
 # Para definir la red bayesiana del juego Buscaminas,
 # primero debemos construir el DAG.
 # Para ello, definimos los vértices y las aristas del grafo.
-def generateBN(height, width, num_of_mines):
-    DAG = generateDAG(height, width)
+def generate_BN(height, width, num_of_mines):
+    DAG = generate_DAG(height, width)
     
     createCPDs(DAG, height, width, num_of_mines)
     
@@ -21,7 +21,7 @@ def generateBN(height, width, num_of_mines):
 # creando aristas que una el vértice Y de esa casilla con los
 # vértices X de las casillas colindantes. Los vértices se crean
 # automáticamente.
-def generateDAG(height, width):            
+def generate_DAG(height, width):            
     n = height
     m = width
     modelo_buscaminas = pgmm.BayesianModel()
