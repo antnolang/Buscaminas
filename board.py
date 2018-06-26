@@ -3,7 +3,7 @@ import math
 import operator
 
 from PyQt5 import QtGui
-from PyQt5.QtCore import QSize
+from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import (QMainWindow, QVBoxLayout, QHBoxLayout, QLayout, 
                              QPushButton, QWidget, QGridLayout, QLabel,
                              QStatusBar, QAction)
@@ -77,6 +77,10 @@ class Board(QMainWindow):
         help_menu.addAction(rules)
         help_menu.addAction(suggest_mechanism)
         
+        # Inicializar mensaje de final de partida
+        self.end_game_message = QLabel()
+        self.end_game_message.setAlignment(Qt.AlignHCenter)
+
         # Inicializar el tablero de casillas
         self.squares = QGridLayout()
         self.squares.setSpacing(0)
@@ -93,6 +97,7 @@ class Board(QMainWindow):
         hor_bot_box.addLayout(self.squares)
         
         vert_box = QVBoxLayout()
+        vert_box.addWidget(self.end_game_message)
         vert_box.addLayout(hor_bot_box)
 
         main_widget = QWidget()
@@ -105,6 +110,8 @@ class Board(QMainWindow):
         self.setCentralWidget(main_widget)
         self.setStatusBar(status_bar)
         self.setMenuBar(menu)
+        self.adjustSize()
+        self.setFixedSize(self.size())
 
         # Inicialización del resto de atributos de la ventana
         self.setWindowTitle('Buscaminas')
@@ -195,16 +202,18 @@ class Board(QMainWindow):
     
         if square.is_mine:
             self.reveal_all_board()
-            end_window = aux_windows.EndGame(False)
-            end_window.exec()
+            self.end_game_message.setText('Has perdido')
+            self.end_game_message.setStyleSheet('border: 1px;' 
+                                                + ' border-style: solid;')
             self.suggested_pos = False
         else:
             self.reveal_information(i, j)
                 
             if self.is_end_game():
                 self.reveal_all_board()
-                end_window = aux_windows.EndGame(True)
-                end_window.exec()
+                self.end_game_message.setText('¡Felicidades! Has ganado')
+                self.end_game_message.setStyleSheet('border: 1px;'
+                                                    + ' border-style: solid;')
                 self.suggested_pos = False
             else:
                 self.suggested_pos = self.suggest_next_square()
