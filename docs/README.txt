@@ -1,4 +1,4 @@
-
+﻿
 DESCRIPCIÓN:
 
     Este programa contiene una implementación del juego "Buscaminas" junto con 
@@ -17,12 +17,30 @@ REQUISITOS:
     - PyQt5: https://www.riverbankcomputing.com/software/pyqt/download5
 
 
-EJECUCIÓN DEL PROGRAMA:
+EJECUCIÓN:
 
     Para ejecutar el programa basta con ejecutar el archivo "main.py" desde la
     consola de comandos:
     
         $ python main.py
+
+    Si se desea ejecutar el programa con una configuración de tablero distinta
+    a la que viene por defecto (5x5 con 5 minas), se puede ejecutar lo siguiente:
+
+        $ python main.py -4 -5 -6
+
+    El primer argumento corresponde a la altura del tablero, el segundo a la
+    anchura y el tercero al número de minas. En el ejemplo mostrado, se generaría
+    un tablero de 4x5 con 6 minas.
+
+    Una vez iniciado el juego, también existe un menú para poder personalizar el
+    tablero.
+
+    Para ejecutar el test de rendimiento de tiempo de ejecución es necesario 
+    pasar los argumentos de configuración más un argumento extra, como se puede 
+    ver en el ejemplo:
+	
+        $ python main.py --testime -4 -5 -6	
 
 
 MENÚ Y OPCIONES DEL JUEGO:
