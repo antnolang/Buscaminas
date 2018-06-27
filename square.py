@@ -36,10 +36,3 @@ class Square(QPushButton):
             self.left_click.emit()
         elif (e.button()==Qt.RightButton and self.is_hidden):
             self.flag.emit()
-            
-    
-    # TODO: Delete later
-    def __str__(self):
-        return 'X={0}, Y={1} and hidden={2}'.format(self.is_mine,
-                                                    self.neighbor_mines,
-                                                    self.is_hidden)

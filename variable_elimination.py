@@ -44,15 +44,13 @@ class VariableElimination(Inference):
         eliminated_variables = set()
         
         # --MODIFICACIÓN 1, 2:
-        #     Ya que las evidencias son fijas en cada partida,
-        #     aplicamos las evidencias de forma permanente en
-        #     la red bayesiana, además de aplicarlas sobre la
-        #     copia de los factores (working_factors).
+        #     Ya que las evidencias son fijas en cada partida, aplicamos las 
+        #     evidencias de forma permanente en la red bayesiana, además de 
+        #     aplicarlas sobre la copia de los factores (working_factors).
         #               
-        #     Además inicializamos working_factors solo con
-        #     los factores de las variables relevantes:
-        #     "Toda variable que no sea antecesor (en la red)
-        #     de alguna de las variables de consulta o de
+        #     Además inicializamos working_factors solo con los factores de 
+        #     las variables relevantes: "Toda variable que no sea antecesor 
+        #     (en la red) de alguna de las variables de consulta o de
         #     evidencia, es irrelevante para la consulta"
 
         if evidence:
@@ -71,11 +69,10 @@ class VariableElimination(Inference):
         #      antecesores de las variables de evidencia.
         #    - Las variables de evidencia son "eliminadas" en el bloque
         #      if-else de arriba ==> dejan de ser variables relevantes
-        #    - Las variables X no tienen antecesores, y las variables Y
-        #      solo tienen como antecesores sus padres directos
-        #      (es decir, no tienen abuelos) ==> no es necesario un
-        #      algoritmo recursivo para calcular los antecesores de
-        #      las variables de evidencia.
+        #    - Las variables X no tienen antecesores, y las variables Y solo 
+        #      tienen como antecesores sus padres directos (es decir, no 
+        #      tienen abuelos) ==> no es necesario un algoritmo recursivo 
+        #      para calcular los antecesores de las variables de evidencia.
         
         relevant_variables = set(variables)
         for e in evidence.keys():
@@ -90,8 +87,8 @@ class VariableElimination(Inference):
         # --
                 
         if not elimination_order:
-        # --MODIFICACIÓN 3: Min-Degree Heuristic. Eliminamos primero
-        #     las variables con menos vecinos
+        # --MODIFICACIÓN 3: Min-Degree Heuristic. Eliminamos primero las 
+        #     variables con menos vecinos.
 
             ordered_degree = sorted(self.model.degree, key=lambda node: node[1])
             ordered_nodes = [node[0] for node in ordered_degree]

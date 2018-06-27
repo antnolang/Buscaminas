@@ -241,7 +241,6 @@ class Board(QMainWindow):
         
         self.evidences[X] = int(square.is_mine)
         self.evidences[Y] = square.neighbor_mines
-        # DEBUGGING: print('=============================\n{}\n============================='.format(self.evidences))
                 
     def suggest_next_square(self):
         prob_X = {}
@@ -252,8 +251,6 @@ class Board(QMainWindow):
             j = sq[1]
             prob_X[(i, j)] = bn.calcule_prob_X(self.variable_elimination, i, j, 
                                                self.evidences)
-        
-        # DEBUGGING: print(prob_X)
 
         # Primera casilla con mayor probabilidad
         # de no contener una mina.
@@ -287,7 +284,9 @@ class Board(QMainWindow):
         return res    
 
 
-    # Las siguientes funciones corresponden a los "slots" de Board():
+# Las siguientes funciones corresponden a los "slots" usados en la aplicación:
+
+    # Resuelve automáticamente un tablero
     def play_game(self):
         if self.suggested_pos:
             print('Pasos de la resolución automática:\n')
@@ -299,9 +298,9 @@ class Board(QMainWindow):
                 print('============================')
 
             if self.get_square(i, j).is_mine:
-                print('\tDERROTA\n=============================')
+                print('\tDERROTA\n============================')
             else:
-                print('\tVICTORIA\n=============================')
+                print('\tVICTORIA\n============================')
 
     def handle_left_click(self):
         i = self.suggested_pos[0]
