@@ -320,6 +320,10 @@ class Board(QMainWindow):
         square.setFlat(True)
         square.setEnabled(False) 
 
+        # Si la casilla tiene bandera, la elimina
+        if square.flagged: 
+            self.handle_flag()
+
         if square.is_mine:
             icon = QtGui.QIcon()
             icon.addPixmap(QtGui.QPixmap(IMAGE_MINE), QtGui.QIcon.Disabled)
