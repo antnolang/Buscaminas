@@ -42,6 +42,10 @@ EJECUCIÓN:
 	
         $ python main.py --testime -4 -5 -6	
 
+    En caso de introducir los argumentos de manera incorrecta, no se mostrará
+    ningún mensaje de error y se iniciará una partida con la configuración por
+    defecto.
+
 
 MENÚ Y OPCIONES DEL JUEGO:
 
