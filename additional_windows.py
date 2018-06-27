@@ -1,4 +1,5 @@
 from PyQt5 import QtGui
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QLabel, QGridLayout,
                              QLayout, QSpinBox, QPushButton, QDialogButtonBox,
                              QMessageBox)
@@ -75,6 +76,7 @@ class Configuration(QDialog):
         self.adjustSize()
         self.setFixedSize(self.size())
         self.setWindowIcon(QtGui.QIcon(IMAGE_ICON))
+        self.setWindowModality(Qt.NonModal)
         self.show()
 
     def init_game(self):
@@ -110,6 +112,7 @@ class Help(QDialog):
         self.setLayout(layout)
         self.setWindowTitle('Ayuda')
         self.setWindowIcon(QtGui.QIcon(IMAGE_ICON))
+        self.setWindowModality(Qt.NonModal)
         self.show()
 
 
@@ -117,31 +120,11 @@ class HelpRules(Help):
 
     def __init__(self):
         super().__init__(TEXT_RULES)
-        self.setGeometry(0, 0, 700, 400)
+        self.setGeometry(100, 100, 700, 400)
 
 
 class HelpSuggestion(Help): 
 
     def __init__(self):
         super().__init__(TEXT_SUGGESTION)
-        self.setGeometry(0, 0, 700, 400)
-
-
-class EndGame(QMessageBox):
-
-    def __init__(self, victory):
-        super().__init__()
-
-        if victory:
-            self.setText('¡Felicidades! Has ganado')
-            self.setWindowTitle('Has ganado')
-        else:
-            self.setText('Has perdido')
-            self.setWindowTitle('Has perdido')
-
-        self.addButton('Aceptar', QMessageBox.AcceptRole)        
-        self.setIcon(QMessageBox.Information)
-        self.setWindowIcon(QtGui.QIcon(IMAGE_ICON))
-        self.adjustSize()
-        self.setFixedSize(self.size())
-        self.show()
+        self.setGeometry(100, 100, 700, 400)

@@ -43,7 +43,7 @@ class VariableElimination(Inference):
 
         eliminated_variables = set()
         
-        # --MODIFICADO:
+        # --MODIFICACIÓN 1, 2:
         #     Ya que las evidencias son fijas en cada partida,
         #     aplicamos las evidencias de forma permanente en
         #     la red bayesiana, además de aplicarlas sobre la
@@ -54,7 +54,7 @@ class VariableElimination(Inference):
         #     "Toda variable que no sea antecesor (en la red)
         #     de alguna de las variables de consulta o de
         #     evidencia, es irrelevante para la consulta"
-        
+
         if evidence:
             for evidence_var in evidence:
                 for factor in self.factors[evidence_var]:
@@ -90,16 +90,17 @@ class VariableElimination(Inference):
         # --
                 
         if not elimination_order:
-            # --MODIFICADO: Min-Degree Heuristic. Eliminamos primero
-            #     las variables con menos vecinos
-            
+        # --MODIFICACIÓN 3: Min-Degree Heuristic. Eliminamos primero
+        #     las variables con menos vecinos
+
             ordered_degree = sorted(self.model.degree, key=lambda node: node[1])
             ordered_nodes = [node[0] for node in ordered_degree]
             elimination_order = [var for var in ordered_nodes 
                                  if var not in set(variables).union(set(evidence.keys() if evidence else []))
                                     and var in relevant_variables]
-            #
-            # --
+
+        #
+        # --
         elif any(var in elimination_order for var in
                  set(variables).union(set(evidence.keys() if evidence else []))):
             raise ValueError("Elimination order contains variables which are in"
