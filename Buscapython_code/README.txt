@@ -75,6 +75,10 @@ EJECUCIÓN:
           mostrará ningún mensaje de error y se iniciará una partida con la 
           configuración por defecto.
 
+    NOTA: La palabra clave usada en los ejemplos para ejecutar un archivo con 
+          Python 3 es "python". Sin embargo, dependiendo del ordenador esta 
+          palabra clave puede variar, como por ejemplo "py -3" o "python3".
+
 
 DESCRIPCIÓN DE LA INTERFAZ:
 
