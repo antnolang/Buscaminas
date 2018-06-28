@@ -2,8 +2,9 @@ import sys
 
 from PyQt5.QtWidgets import QApplication
 
-from tests.test_time import average_time
-import board as b
+from tests.test import average_time
+from tests.test import average_success
+from src import board as b
 
 
 def main(height, width, num_of_mines):
@@ -30,6 +31,15 @@ if __name__ == '__main__':
         num_of_mines = sys.argv[4]
         num_of_mines = int(num_of_mines.replace('-', ''))
 
-        average_time(b, height, width, num_of_mines)
+        average_time(height, width, num_of_mines)
+    elif len(sys.argv) == 5 and sys.argv[1] == '--testsuccess':
+        height = sys.argv[2]
+        height = int(height.replace('-', ''))
+        width = sys.argv[3]
+        width = int(width.replace('-', ''))
+        num_of_mines = sys.argv[4]
+        num_of_mines = int(num_of_mines.replace('-', ''))
+
+        average_success(height, width, num_of_mines)
     else:
         main(5, 5, 5)

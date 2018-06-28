@@ -8,10 +8,10 @@ from PyQt5.QtWidgets import (QMainWindow, QVBoxLayout, QHBoxLayout, QLayout,
                              QPushButton, QWidget, QGridLayout, QLabel,
                              QStatusBar, QAction)
 
-import square as sq
-import variable_elimination as ve
-import bayesian_network as bn
-import additional_windows as aux_windows
+from . import square as sq
+from . import additional_windows as aux_windows
+from .inference import variable_elimination as ve
+from .inference import bayesian_network as bn
 
 
 # Cada dupla corresponde a los valores que hay que sumar

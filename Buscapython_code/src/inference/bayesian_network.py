@@ -134,7 +134,6 @@ def create_x_CPD(node, DAG, height, width, num_of_mines):
     
     x_CPD = pgmf.TabularCPD(node, 2, [[prob_no_X, prob_X]])
     
-    print(x_CPD)
     DAG.add_cpds(x_CPD)
 
     
