@@ -1,12 +1,16 @@
 ﻿¿QUÉ ES BUSCAPYTHON?:
 
+    Es un trabajo realizado para la asignatura de Inteligencia Artificial del 
+    grado Ingeniería informática - Ingeniería del Software en la Universidad de 
+    Sevilla.
+
     Buscapython contiene una implementación del juego "Buscaminas" junto con 
     un mecanismo de sugerencia probabilístico. Este mecanismo de sugerencia 
     está basado en una red bayesiana a la que se aplica inferencia exacta (en 
     concreto eliminación de variables) para calcular, en todo momento, la 
     casilla con menor probabilidad de contener una mina.
 
-    Para más detalles ver la documentación adjunta al código fuente.
+    Para más detalles ver el documento "Memoria Buscapython".
 
 
 REQUISITOS:
