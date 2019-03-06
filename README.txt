@@ -135,3 +135,7 @@ CONTROLES BÁSICOS:
     - Tras elegir el primer movimiento de una partida, se marcará (de color 
       verde) en todo momento la casilla sugerida por el sistema. Será decisión 
       del usuario clickar sobre esa casilla u otra.
+
+LICENCIA DE ICONOS:
+
+    Icons made by Creaticca Creative Agency and Smashicons from www.flaticon.com
